@@ -1,0 +1,95 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Website</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-mono">
+    <header class="text-white bg-stone-950 py-4">
+        <div class="container mx-auto flex items-center justify-between">
+            <a href="Blog_Website.html" class="text-3xl font-bold">Blog Buddy</a>
+            <nav>
+                <a href="Blog_Website.html" class="mx-2 hover:text-gray-300">Home</a>
+            </nav>
+        </div>
+    </header>
+    <div class="container mx-auto p-5">
+        <form class="bg-white p-6 rounded shadow-md">
+            <label for="blog_title" class="block text-lg font-semibold">Blog Title:</label>
+            <input class="w-full p-2 border border-gray-300 rounded mt-2" type="text" id="blog_title" name="blog_title" placeholder="Enter Blog Title">
+            
+            <label for="blog_content" class="block text-lg font-semibold mt-4">Blog Content:</label>
+            <textarea class="w-full p-2 border border-gray-300 rounded mt-2" id="blog_content" name="blog_content" placeholder="Enter Blog Content" style="height: 200px;"></textarea>
+            
+            <div class="mt-4">
+                <button type="button" class="mt-2 py-2 px-3 bg-stone-950 text-white rounded hover:bg-neutral-50 hover:text-stone-950" onclick="saveBlog()">Add</button>
+                <button type="button" class="mt-2 py-2 px-3 bg-stone-950 text-white rounded hover:bg-neutral-50 hover:text-stone-950" onclick="clearBlogs()">Clear</button>
+            </div>
+        </form>
+    </div>
+    <div class="container mx-auto mt-10">
+        <h2 class="text-2xl font-bold mb-4">Blogs</h2>
+        <div id="blogList" class="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+    <script>
+        function saveBlog() {
+            const title = document.getElementById('blog_title').value;
+            const content = document.getElementById('blog_content').value;
+            if (title != '' && content != '') {
+                const blogs = JSON.parse(localStorage.getItem('blogs')) || [];
+                blogs.push({ title, content, views: 0, showFullContent: false });
+                localStorage.setItem('blogs', JSON.stringify(blogs));
+                displayBlogs();
+            }
+        }
+
+        function clearBlogs() {
+            document.getElementById('blog_title').value = '';
+            document.getElementById('blog_content').value = '';
+        }
+
+        function displayBlogs() {
+            const blogs = JSON.parse(localStorage.getItem('blogs')) || [];
+            const blogList = document.getElementById('blogList');
+            blogList.innerHTML = '';
+            blogs.forEach((blog, index) => {
+                blogList.innerHTML += `
+                    <div class="bg-white p-4 rounded shadow-md">
+                        <h3 class="text-xl font-semibold hover:underline">${blog.title}</h3>
+                        <p class="indent-10">${blog.showFullContent ? blog.content : blog.content.substring(0, 100) + '...'}</p>
+                        <button class="mt-2 py-2 px-3 bg-stone-950 text-white rounded hover:bg-neutral-50 hover:text-stone-950" onclick="viewBlog(${index})">${blog.showFullContent ? 'Show Less' : 'Show More'}</button>
+                        <button class="mt-2 py-2 px-3 bg-stone-950 text-white rounded hover:bg-neutral-50 hover:text-stone-950" onclick="editBlog(${index})">Edit</button>
+                        <button class="mt-2 py-2 px-3 bg-stone-950 text-white rounded hover:bg-neutral-50 hover:text-stone-950" onclick="deleteBlog(${index})">Delete</button>
+                        <p class="mt-2 text-sm text-gray-600">Views: ${blog.views}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function viewBlog(index) {
+            const blogs = JSON.parse(localStorage.getItem('blogs'));
+            if (!blogs[index].showFullContent) { blogs[index].views += 1; }
+            blogs[index].showFullContent = !blogs[index].showFullContent;
+            localStorage.setItem('blogs', JSON.stringify(blogs));
+            displayBlogs();
+        }
+
+        function editBlog(index) {
+            const blogs = JSON.parse(localStorage.getItem('blogs'));
+            document.getElementById('blog_title').value = blogs[index].title;
+            document.getElementById('blog_content').value = blogs[index].content;
+            deleteBlog(index);
+        }
+
+        function deleteBlog(index) {
+            const blogs = JSON.parse(localStorage.getItem('blogs'));
+            blogs.splice(index, 1);
+            localStorage.setItem('blogs', JSON.stringify(blogs));
+            displayBlogs();
+        }
+
+        window.onload = displayBlogs;
+    </script>
+</body>
+</html>
